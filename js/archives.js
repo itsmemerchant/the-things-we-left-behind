@@ -427,14 +427,14 @@
     id: null, slide: 0, ret: 'play', t: 0, trans: 0, info: null,
     snap: null, hasSnap: false,          /* double-buffer snapshot */
     warm: { total: 0, got: 0 },          /* preload gate */
-    scanOn: false, lensOn: false
+    scanOn: false
   };
 
   /* layout constants (TL 960x540) */
   var HDR_H = 60;                                        /* unified header bar */
   var XRECT = { x: 900, y: 14, w: 36, h: 32 };           /* close button */
   var V = { x: 36, y: 100, w: 400, h: 300 };             /* visual stage (left) */
-  var CHIP = { y: 416, h: 28 };                          /* LENS / SCAN chips */
+  var CHIP = { y: 416, h: 28 };                          /* SCAN chip */
   var RC = { x: 508, w: 424 };                           /* right column */
   var FTR = { y: 478, h: 30 };                           /* anchored footer */
   var SPLIT_X = 486;                                     /* vertical divider */
@@ -451,7 +451,7 @@
     SL.slide = TL.clamp(TL.S.archPos[id] || 0, 0, n - 1);
     SL.ret = ret || 'play';
     SL.info = null;
-    SL.scanOn = false; SL.lensOn = false;
+    SL.scanOn = false;
     SL.hasSnap = false;
     SL.trans = 0.4;
     SL.t = 0;
@@ -503,7 +503,6 @@
     var a = SL.a(), n = a.slides.length, last = SL.slide >= n - 1;
     var s2 = a.slides[SL.slide];
     /* tools */
-    if (TL.hit('m')) { SL.lensOn = !SL.lensOn; TL.audio.ui(); }
     if (TL.hit('s') && s2.scan) { SL.scanOn = !SL.scanOn; TL.audio.ui(); }
     /* keyboard / touch buttons */
     if (SL.slide > 0 && (TL.hit('arrowleft') || TL.jumpHit())) { SL.change(-1); return; }
@@ -524,8 +523,7 @@
         if (last) SL.close(); else SL.change(1);
         return;
       }
-      if (inRect(m, V.x, CHIP.y, 120, CHIP.h)) { SL.lensOn = !SL.lensOn; TL.audio.ui(); return; }
-      if (s2.scan && inRect(m, V.x + 128, CHIP.y, 120, CHIP.h)) { SL.scanOn = !SL.scanOn; TL.audio.ui(); return; }
+      if (s2.scan && inRect(m, V.x, CHIP.y, 120, CHIP.h)) { SL.scanOn = !SL.scanOn; TL.audio.ui(); return; }
       /* hotspots */
       if (s2.hs) {
         for (var i = 0; i < s2.hs.length; i++) {
@@ -671,39 +669,11 @@
     }
     ctx.restore();
 
-    /* LENS [M] magnifier — floats over the stage, magnifies the imagery */
-    if (SL.lensOn && img) {
-      var mx = TL.mouse.x, my = TL.mouse.y;
-      if (mx > V.x && mx < V.x + V.w && my > V.y && my < V.y + V.h) {
-        var LR = 52;
-        ctx.save();
-        ctx.beginPath(); ctx.arc(mx, my, LR, 0, Math.PI * 2); ctx.clip();
-        /* magnify the cover image ×2.4 around the cursor */
-        ctx.translate(mx, my); ctx.scale(2.4, 2.4); ctx.translate(-mx, -my);
-        ctx.translate(-V.x, -V.y);
-        TL.rect(ctx, V.x, V.y, V.w, V.h, '#04080e');
-        drawArchivePhoto(ctx, img, V.x, V.y, V.w, V.h);
-        ctx.restore();
-        /* lens rim + crosshair */
-        ctx.strokeStyle = '#c8e8f8'; ctx.lineWidth = 3;
-        ctx.beginPath(); ctx.arc(mx, my, LR, 0, Math.PI * 2); ctx.stroke();
-        ctx.strokeStyle = 'rgba(126,240,200,0.7)'; ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(mx - 10, my); ctx.lineTo(mx + 10, my);
-        ctx.moveTo(mx, my - 10); ctx.lineTo(mx, my + 10);
-        ctx.stroke();
-        ctx.lineWidth = 1;
-      }
-    }
-
-    /* stage control chips */
-    var lensHot = inRect(TL.mouse, V.x, CHIP.y, 120, CHIP.h);
-    TL.panel(ctx, V.x, CHIP.y, 120, CHIP.h, { bg: SL.lensOn ? 'rgba(20,60,56,0.95)' : 'rgba(8,22,28,0.92)', corner: lensHot || SL.lensOn ? '#7ef0c8' : '#3a7a6a' });
-    TL.text(ctx, SL.lensOn ? 'LENS ON [M]' : 'LENS [M]', V.x + 60, CHIP.y + 10, 7, SL.lensOn ? '#aef0dd' : '#7ab8a8', 'center');
+    /* SCAN [S] chip — floats under the stage; no lens (removed) */
     if (s2.scan) {
-      var scanHot = inRect(TL.mouse, V.x + 128, CHIP.y, 120, CHIP.h);
-      TL.panel(ctx, V.x + 128, CHIP.y, 120, CHIP.h, { bg: SL.scanOn ? 'rgba(20,60,56,0.95)' : 'rgba(8,22,28,0.92)', corner: scanHot || SL.scanOn ? '#7ef0c8' : '#3a7a6a' });
-      TL.text(ctx, SL.scanOn ? 'SCAN ON [S]' : 'SCAN [S]', V.x + 188, CHIP.y + 10, 7, SL.scanOn ? '#aef0dd' : '#7ab8a8', 'center');
+      var scanHot = inRect(TL.mouse, V.x, CHIP.y, 120, CHIP.h);
+      TL.panel(ctx, V.x, CHIP.y, 120, CHIP.h, { bg: SL.scanOn ? 'rgba(20,60,56,0.95)' : 'rgba(8,22,28,0.92)', corner: scanHot || SL.scanOn ? '#7ef0c8' : '#3a7a6a' });
+      TL.text(ctx, SL.scanOn ? 'SCAN ON [S]' : 'SCAN [S]', V.x + 60, CHIP.y + 10, 7, SL.scanOn ? '#aef0dd' : '#7ab8a8', 'center');
     }
 
     /* ============ RIGHT — INFORMATION & CONTROLS ============ */

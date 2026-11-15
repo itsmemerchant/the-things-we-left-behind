@@ -162,7 +162,6 @@ window.TL = window.TL || {};
       (mode === 'play' || mode === 'minigame' ? 'Pause' : 'Back');
     document.getElementById('t-jump').textContent = mode === 'play' ? 'Jump' : slides ? 'Prev' : 'Fire';
     document.getElementById('t-act').textContent = mode === 'play' ? 'Interact' : slides ? 'Next' : 'Select';
-    document.getElementById('t-lens').hidden = !slides;
     document.getElementById('t-scan').hidden = !slides;
     TL.fitLayout();
   };
