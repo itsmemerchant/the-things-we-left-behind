@@ -393,6 +393,8 @@
   builders.chart = function (cfg) {
     var phase = 'idle'; // idle | running | done
     var prog = 0, sel = -1;
+    /* wrap the question once so click hitboxes and drawn boxes agree */
+    var qLines = TL.wrap(TL.ctx, cfg.question, TL.W - 200, 9);
     var g = {
       update: function (dt) {
         if (phase === 'idle') {
@@ -405,7 +407,7 @@
           if (prog >= 1) { prog = 1; phase = 'done'; TL.audio.chime(1.4); }
         } else {
           for (var i = 0; i < cfg.options.length; i++) {
-            var y = 356 + i * 40;
+            var y = 356 + i * 40 + qLines.length * 13;
             if (TL.mouse.x > 80 && TL.mouse.x < TL.W - 80 && TL.mouse.y > y && TL.mouse.y < y + 34 && TL.mouse.clicked) { sel = i; g.check(); }
             if (TL.hit(String(i + 1))) { sel = i; g.check(); }
           }
@@ -455,7 +457,6 @@
         }
         /* question + options */
         if (phase === 'done') {
-          var qLines = TL.wrap(ctx, cfg.question, TL.W - 200, 9);
           var qy = 336;
           for (var q = 0; q < qLines.length; q++) TL.text(ctx, qLines[q], 80, qy + q * 13, 9, '#c8e8dc');
           for (var o = 0; o < cfg.options.length; o++) {
@@ -1304,7 +1305,7 @@
           }
         } else {
           for (var o = 0; o < cfg.options.length; o++) {
-            var y = 150 + o * 44;
+            var y = 160 + o * 44;
             if (TL.mouse.x > TL.W / 2 - 40 && TL.mouse.x < TL.W - 60 && TL.mouse.y > y && TL.mouse.y < y + 38 && TL.mouse.clicked) { sel = o; g.check(); }
             if (TL.hit(String(o + 1))) { sel = o; g.check(); }
           }
